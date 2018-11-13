@@ -1,8 +1,9 @@
 import React, { PureComponent } from 'react';
 import TextField from "@material-ui/core/TextField";
 import styled from "styled-components";
-import axios, { CancelToken } from "axios";
+import axios from "axios";
 
+import { parseLinkHeader } from "./utils";
 import Table from './Table';
 
 const Wrapper = styled.div`
@@ -21,6 +22,7 @@ class App extends PureComponent {
   state = {
     q: '',
     loading: false,
+    repos: [],
   }
 
   handleChange = (event) => {
@@ -43,17 +45,25 @@ class App extends PureComponent {
     this.setState({
       q: value,
       loading: true,
+      repos: [],
     })
     this.timer = setTimeout(async () => {
       const url = `https://api.github.com/search/repositories?q=${value}`;
-      this.source = CancelToken.source();
+      this.source = axios.CancelToken.source();
       try {
+
         const response = await axios.get(url, {
           cancelToken: this.source.token,
         });
+
+        const linkString = response.headers.link;
+        const link = parseLinkHeader(linkString);
+        
+
         this.setState({
           repos: response.data.items,
           loading: false,
+          nextPage: link.next,
         });
       } catch(error) {
         console.log('handle error', error);
@@ -63,6 +73,28 @@ class App extends PureComponent {
       }
       
     }, 500);
+  }
+
+  handleLoadMore = async () => {
+    const { loading, nextPage } = this.state;
+    // return if loading, hasNoMore
+    if(loading || !nextPage) return;
+    this.setState({
+      loading: true,
+    })
+
+    try {
+      const response = await axios.get(nextPage);
+      const linkString = response.headers.link;
+      const link = parseLinkHeader(linkString);
+      this.setState(prev => ({
+        loading: false,
+        repos: [...prev.repos, ...response.data.items],
+        nextPage: link.next
+      }))
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   render() {
@@ -76,9 +108,11 @@ class App extends PureComponent {
           onChange={this.handleChange}
           variant="outlined"
         />
-        {loading? <div>loading</div> : <Table
+        <Table
           data={repos}
-        />}
+          loading={loading}
+          loadMore={this.handleLoadMore}
+        />
       </Wrapper>
     );
   }
