@@ -1,7 +1,6 @@
 import React, { PureComponent } from 'react';
 import styled from "styled-components";
 import PropTypes from "prop-types";
-import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { StarIcon, ForkIcon } from "./Icons";
 
@@ -9,7 +8,7 @@ import { StarIcon, ForkIcon } from "./Icons";
 const Wrapper = styled.div`
   max-height: calc(100vh - 116px);
   padding: 20px;
-  overflow-y: scroll;
+  overflow-y: auto;
 `;
 
 const Row = styled.tr`
@@ -31,8 +30,8 @@ const Row = styled.tr`
 
 class Table extends PureComponent {
   static defaultProps = {
-    loading: false,
-    loadMore: () => {}
+    loadMore: () => {},
+    children: null,
   }
 
   static propTypes = {
@@ -41,8 +40,8 @@ class Table extends PureComponent {
       stargazers_count: PropTypes.number,
       forks: PropTypes.number,
     })).isRequired,
-    loading: PropTypes.bool,
     loadMore: PropTypes.func,
+    children: PropTypes.node,
   }
 
   handleScroll = (event) => {
@@ -55,7 +54,7 @@ class Table extends PureComponent {
   }
 
   render() {
-    const { data, loading } = this.props;
+    const { data, children } = this.props;
 
     return (
       <Wrapper onScroll={this.handleScroll}>
@@ -79,11 +78,7 @@ class Table extends PureComponent {
             ))}
           </tbody>
         </table>
-        {loading &&
-          <div style={{ textAlign: 'center' }}>
-            <CircularProgress/>
-          </div>
-        }
+        {children}
       </Wrapper>
     );
   }
