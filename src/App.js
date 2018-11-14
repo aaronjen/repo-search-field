@@ -63,13 +63,10 @@ class App extends PureComponent {
         });
 
         const linkString = response.headers.link;
-        const link = parseLinkHeader(linkString);
-        
-
         this.setState({
           repos: response.data.items,
           loading: false,
-          nextPage: link.next,
+          nextPage: linkString? parseLinkHeader(linkString).next : null,
         });
       } catch(error) {
         this.handleRequestError(error);
