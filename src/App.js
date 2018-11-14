@@ -41,14 +41,18 @@ class App extends PureComponent {
 
     this.setState({
       q: value,
-      loading: true,
+      loading: false,
       repos: [],
       error: null,
+      nextPage: null,
     })
-    
+
     // no need to send request if field is empty
     if(value === '') return;
 
+    this.setState({
+      loading: true,
+    })
     this.timer = setTimeout(async () => {
       const url = `https://api.github.com/search/repositories?q=${value}`;
       this.source = axios.CancelToken.source();
@@ -77,10 +81,10 @@ class App extends PureComponent {
     const { loading, nextPage, error } = this.state;
     // return if loading, hasNoMore, error
     if(loading || !nextPage || error) return;
+    
     this.setState({
       loading: true,
     })
-
     try {
       const response = await axios.get(nextPage);
       const linkString = response.headers.link;
@@ -102,6 +106,7 @@ class App extends PureComponent {
       this.setState({
         loading: false,
         error: 'no-ratelimit-remaining',
+        nextPage: response.config.url
       })
     }
     else {
@@ -114,9 +119,8 @@ class App extends PureComponent {
 
   handleRetry = () => {
     this.setState({
-      loading: false,
       error: null,
-    })
+    }, this.handleLoadMore);
   }
 
   render() {
