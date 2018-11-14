@@ -1,5 +1,5 @@
 # Repo search field
-Demo: https://repo-search-field.herokuapp.com/
+Demo: https://bugarma.github.io/repo-search-field/
 
 透過 github-api 搜尋相關 github repos，並實作 infinite scroll。
 
