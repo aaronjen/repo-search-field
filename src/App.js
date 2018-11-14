@@ -101,7 +101,6 @@ class App extends PureComponent {
   handleRequestError = (error) => {
     if(axios.isCancel(error)) return;
     const { response } = error;
-    console.log(response);
     if(response.headers['x-ratelimit-remaining'] === "0") {
       this.setState({
         loading: false,
@@ -133,6 +132,7 @@ class App extends PureComponent {
           className="input-field"
           onChange={this.handleChange}
           variant="outlined"
+          placeholder="Repo search field"
         />
         <Table
           data={repos}
