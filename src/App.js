@@ -27,31 +27,28 @@ class App extends PureComponent {
     repos: [],
   }
 
+  // 設定 timer 避免輸入時，短時間大量 request
   handleChange = (event) => {
     const { value } = event.target;
-    
-    if(value === '') {
-      this.setState({
-        q: value,
-        loading: false,
-        repos: [],
-        error: null,
-      });
-      return;
-    }
 
+    // clear timeout & cancel request
     if(this.timer) {
       clearTimeout(this.timer);
     }
     if(this.source) {
       this.source.cancel();
     }
+
     this.setState({
       q: value,
       loading: true,
       repos: [],
       error: null,
     })
+    
+    // no need to send request if field is empty
+    if(value === '') return;
+
     this.timer = setTimeout(async () => {
       const url = `https://api.github.com/search/repositories?q=${value}`;
       this.source = axios.CancelToken.source();
@@ -78,7 +75,7 @@ class App extends PureComponent {
 
   handleLoadMore = async () => {
     const { loading, nextPage, error } = this.state;
-    // return if loading, hasNoMore
+    // return if loading, hasNoMore, error
     if(loading || !nextPage || error) return;
     this.setState({
       loading: true,
